@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mi Inventario + Ventas</title>
+    <style>
+        :root {
+            --fondo: #f5f7fa;
+            --tarjeta: #ffffff;
+            --texto: #2d3436;
+            --texto-secundario: #636e72;
+            --acento: #0984e3;
+            --verde: #00b894;
+            --rojo: #d63031;
+            --amarillo: #fdcb6e;
+            --sombra: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background-color: var(--fondo);
+            padding: 15px;
+            padding-bottom: 80px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .contenedor {
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin: 20px 0;
+            text-align: center;
+            color: var(--texto);
+        }
+        .tasa-banner {
+            background: var(--tarjeta);
+            border-radius: 15px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            box-shadow: var(--sombra);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tasa-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tasa-valor {
+            font-weight: bold;
+            color: var(--acento);
+            font-size: 1.2rem;
+        }
+        .tasa-fecha {
+            font-size: 0.8rem;
+            color: var(--texto-secundario);
+        }
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .btn-primario {
+            background-color: var(--acento);
+            color: white;
+            font-weight: 600;
+        }
+        .btn-primario:active {
+            background-color: #076bb5;
+        }
+        .btn-secundario {
+            background-color: #dfe6e9;
+            color: var(--texto);
+        }
+        .btn-verde {
+            background-color: var(--verde);
+            color: white;
+            font-weight: 600;
+        }
+        .btn-rojo {
+            background-color: var(--rojo);
+            color: white;
+            font-weight: 600;
+        }
+        .filtros {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+        .filtro-btn {
+            background: white;
+            border: 2px solid #dfe6e9;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .filtro-activo {
+            background: var(--acento);
+            color: white;
+            border-color: var(--acento);
+        }
+        .estadisticas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .stat-card {
+            background: var(--tarjeta);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: var(--sombra);
+        }
+        .stat-valor {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--acento);
+        }
+        .stat-etiqueta {
+            font-size: 0.8rem;
+            color: var(--texto-secundario);
+            margin-top: 4px;
+        }
+        .lista-productos {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .producto {
+            background: var(--tarjeta);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: var(--sombra);
+        }
+        .producto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .producto-nombre {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--texto);
+        }
+        .producto-estado {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .estado-disponible {
+            background: #d4f4e8;
+            color: #00875a;
+        }
+        .estado-agotado {
+            background: #ffe5e5;
+            color: #cc0000;
+        }
+        .producto-precios {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .precio-item {
+            text-align: center;
+        }
+        .precio-etiqueta {
+            font-size: 0.8rem;
+            color: var(--texto-secundario);
+        }
+        .precio-valor {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .precio-usd {
+            color: var(--acento);
+        }
+        .precio-bs {
+            color: var(--verde);
+        }
+        .producto-acciones {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-accion {
+            flex: 1;
+            min-width: 60px;
+            padding: 8px;
+            font-size: 0.85rem;
+        }
+        .formulario {
+            background: var(--tarjeta);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--sombra);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .formulario input {
+            padding: 12px;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .formulario input:focus {
+            outline: none;
+            border-color: var(--acento);
+        }
+        .fila-botones {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .vacio {
+            text-align: center;
+            color: var(--texto-secundario);
+            margin-top: 40px;
+        }
+        .historial-ventas {
+            margin-top: 20px;
+        }
+        .venta-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: var(--sombra);
+        }
+        @media (max-width: 400px) {
+            h1 { font-size: 1.5rem; }
+            .precio-valor { font-size: 0.9rem; }
+            .estadisticas { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>📦 Inventario + Ventas</h1>
+
+        <!-- Banner de tasa -->
+        <div class="tasa-banner">
+            <div class="tasa-info">
+                <span>💵 Tasa (Monitor):</span>
+                <span class="tasa-valor" id="tasaValor">Cargando...</span>
+                <span class="tasa-fecha" id="tasaFecha"></span>
+            </div>
+            <button class="btn-secundario" id="btnActualizarTasa">Actualizar</button>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="estadisticas">
+            <div class="stat-card">
+                <div class="stat-valor" id="statProductos">0</div>
+                <div class="stat-etiqueta">Productos Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-valor" id="statInvertido">$0</div>
+                <div class="stat-etiqueta">Total Invertido</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-valor" id="statVendido">$0</div>
+                <div class="stat-etiqueta">Total Vendido</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filtros">
+            <button class="filtro-btn filtro-activo" data-filtro="todos">Todos</button>
+            <button class="filtro-btn" data-filtro="disponibles">Disponibles</button>
+            <button class="filtro-btn" data-filtro="vendidos">Vendidos</button>
+        </div>
+
+        <!-- Formulario para nuevo producto -->
+        <div class="formulario" id="formulario">
+            <input type="text" id="inputNombre" placeholder="Nombre del producto" required>
+            <input type="number" id="inputPrecioUSD" placeholder="Precio por unidad en USD" step="0.01" min="0" required>
+            <input type="number" id="inputCantidad" placeholder="Cantidad total" step="1" min="1" required>
+            <div class="fila-botones">
+                <button class="btn-secundario" id="btnCancelarEdicion" style="display:none;">Cancelar</button>
+                <button class="btn-primario" id="btnAgregar">Agregar producto</button>
+            </div>
+        </div>
+
+        <!-- Lista de productos -->
+        <div id="listaProductos" class="lista-productos"></div>
+
+        <!-- Historial de ventas -->
+        <div class="historial-ventas" id="historialVentas" style="display:none;">
+            <h3>📊 Historial de Ventas</h3>
+            <div id="listaVentas"></div>
+        </div>
+    </div>
+
+    <script>
+        // ---------- CONFIGURACIÓN ----------
+        const API_URL = 'https://api.exchangemonitor.net/api/venezuela';
+
+        // ---------- ESTADO GLOBAL ----------
+        let tasaActual = null;
+        let fechaTasa = null;
+        let productos = [];
+        let ventas = [];
+        let filtroActual = 'todos';
+        let editandoId = null;
+
+        // ---------- FUNCIONES DE ALMACENAMIENTO ----------
+        function guardarDatos() {
+            localStorage.setItem('productos', JSON.stringify(productos));
+            localStorage.setItem('ventas', JSON.stringify(ventas));
+        }
+
+        function cargarDatos() {
+            const prodGuardados = localStorage.getItem('productos');
+            const ventasGuardadas = localStorage.getItem('ventas');
+            if (prodGuardados) productos = JSON.parse(prodGuardados);
+            if (ventasGuardadas) ventas = JSON.parse(ventasGuardadas);
+        }
+
+        function guardarTasa() {
+            if (tasaActual && fechaTasa) {
+                localStorage.setItem('tasa', JSON.stringify({ valor: tasaActual, fecha: fechaTasa }));
+            }
+        }
+
+        function cargarTasa() {
+            const guardada = localStorage.getItem('tasa');
+            if (guardada) {
+                const datos = JSON.parse(guardada);
+                tasaActual = datos.valor;
+                fechaTasa = datos.fecha;
+            }
+        }
+
+        // ---------- OBTENER TASA DE CAMBIO (Monitor Dólar) ----------
+        async function obtenerTasa() {
+            try {
+                const respuesta = await fetch(API_URL);
+                if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+                const datos = await respuesta.json();
+                
+                if (datos && datos.data && datos.data.monitor && datos.data.monitor.price) {
+                    tasaActual = parseFloat(datos.data.monitor.price);
+                    fechaTasa = new Date().toLocaleDateString('es-VE', { year: 'numeric', month: 'short', day: 'numeric' });
+                    guardarTasa();
+                    actualizarInterfaz();
+                } else {
+                    throw new Error('Formato de respuesta inesperado');
+                }
+            } catch (error) {
+                console.error('Error al obtener tasa:', error);
+                if (tasaActual === null) {
+                    tasaActual = 0;
+                    fechaTasa = 'Sin tasa';
+                }
+                actualizarInterfaz();
+                alert('No se pudo actualizar la tasa del Monitor Dólar. Se usará la última guardada.');
+            }
+        }
+
+        // ---------- CÁLCULOS ----------
+        function calcularPrecios(producto) {
+            const precioUnitarioUSD = producto.precioUSD;
+            const cantidadDisponible = producto.cantidad - producto.vendidos;
+            const precioLoteUSD = precioUnitarioUSD * cantidadDisponible;
+            const precioUnitarioBs = tasaActual ? precioUnitarioUSD * tasaActual : 0;
+            const precioLoteBs = tasaActual ? precioLoteUSD * tasaActual : 0;
+            
+            return {
+                precioUnitarioUSD,
+                precioLoteUSD,
+                precioUnitarioBs,
+                precioLoteBs,
+                cantidadDisponible,
+                cantidadVendida: producto.vendidos
+            };
+        }
+
+        function actualizarEstadisticas() {
+            const totalInvertido = productos.reduce((sum, p) => sum + (p.precioUSD * p.cantidad), 0);
+            const totalVendido = ventas.reduce((sum, v) => sum + v.montoUSD, 0);
+            const productosActivos = productos.filter(p => p.cantidad > p.vendidos).length;
+            
+            document.getElementById('statProductos').textContent = productosActivos;
+            document.getElementById('statInvertido').textContent = `$${totalInvertido.toFixed(2)}`;
+            document.getElementById('statVendido').textContent = `$${totalVendido.toFixed(2)}`;
+            
+            // Mostrar historial si hay ventas
+            if (ventas.length > 0) {
+                document.getElementById('historialVentas').style.display = 'block';
+                mostrarHistorialVentas();
+            }
+        }
+
+        function mostrarHistorialVentas() {
+            const listaVentas = document.getElementById('listaVentas');
+            listaVentas.innerHTML = '';
+            ventas.slice().reverse().forEach(venta => {
+                const ventaItem = document.createElement('div');
+                ventaItem.className = 'venta-item';
+                ventaItem.innerHTML = `
+                    <div>
+                        <strong>${venta.nombreProducto}</strong><br>
+                        <small>${venta.fecha} - ${venta.cantidad} unidad(es)</small>
+                    </div>
+                    <div class="precio-usd">$${venta.montoUSD.toFixed(2)}</div>
+                `;
+                listaVentas.appendChild(ventaItem);
+            });
+        }
+
+        // ---------- INTERFAZ ----------
+        function actualizarInterfaz() {
+            // Tasa
+            const tasaElemento = document.getElementById('tasaValor');
+            const fechaElemento = document.getElementById('tasaFecha');
+            if (tasaActual !== null && tasaActual !== 0) {
+                tasaElemento.textContent = `Bs. ${tasaActual.toFixed(2)}`;
+                fechaElemento.textContent = fechaTasa ? `(${fechaTasa})` : '';
+            } else {
+                tasaElemento.textContent = 'No disponible';
+                fechaElemento.textContent = '';
+            }
+
+            // Filtrar productos
+            let productosFiltrados = productos;
+            if (filtroActual === 'disponibles') {
+                productosFiltrados = productos.filter(p => p.cantidad > p.vendidos);
+            } else if (filtroActual === 'vendidos') {
+                productosFiltrados = productos.filter(p => p.vendidos > 0);
+            }
+
+            // Lista de productos
+            const lista = document.getElementById('listaProductos');
+            lista.innerHTML = '';
+            if (productosFiltrados.length === 0) {
+                lista.innerHTML = '<div class="vacio">No hay productos en esta categoría 📦</div>';
+                actualizarEstadisticas();
+                return;
+            }
+
+            productosFiltrados.forEach((producto) => {
+                const precios = calcularPrecios(producto);
+                const estaAgotado = producto.cantidad <= producto.vendidos;
+                const tieneDisponibles = precios.cantidadDisponible > 0;
+                
+                const card = document.createElement('div');
+                card.className = 'producto';
+                card.innerHTML = `
+                    <div class="producto-header">
+                        <div class="producto-nombre">${producto.nombre}</div>
+                        <div class="producto-estado ${estaAgotado ? 'estado-agotado' : 'estado-disponible'}">
+                            ${estaAgotado ? 'Agotado' : `${precios.cantidadDisponible} disponibles`}
+                        </div>
+                    </div>
+                    <div class="producto-precios">
+                        <div class="precio-item">
+                            <div class="precio-etiqueta">Precio Unitario</div>
+                            <div class="precio-valor precio-usd">$${precios.precioUnitarioUSD.toFixed(2)}</div>
+                            <div class="precio-valor precio-bs">Bs. ${precios.precioUnitarioBs.toFixed(2)}</div>
+                        </div>
+                        <div class="precio-item">
+                            <div class="precio-etiqueta">Lote Completo</div>
+                            <div class="precio-valor precio-usd">$${precios.precioLoteUSD.toFixed(2)}</div>
+                            <div class="precio-valor precio-bs">Bs. ${precios.precioLoteBs.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div class="producto-acciones">
+                        <button class="btn-accion btn-verde" data-id="${producto.id}" data-accion="vender-unidad" ${!tieneDisponibles ? 'disabled' : ''}>
+                            Vender 1
+                        </button>
+                        <button class="btn-accion btn-rojo" data-id="${producto.id}" data-accion="vender-lote" ${!tieneDisponibles ? 'disabled' : ''}>
+                            Vender Lote
+                        </button>
+                        <button class="btn-accion btn-secundario" data-id="${producto.id}" data-accion="editar">
+                            Editar
+                        </button>
+                        <button class="btn-accion btn-secundario" data-id="${producto.id}" data-accion="eliminar">
+                            🗑️
+                        </button>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 0.8rem; color: var(--texto-secundario);">
+                        Total: ${producto.cantidad} | Vendidos: ${precios.cantidadVendida} | Disponibles: ${precios.cantidadDisponible}
+                    </div>
+                `;
+                lista.appendChild(card);
+            });
+
+            // Asignar eventos
+            document.querySelectorAll('.btn-accion').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const accion = e.target.dataset.accion;
+                    ejecutarAccion(accion, id);
+                });
+            });
+
+            actualizarEstadisticas();
+        }
+
+        // ---------- ACCIONES ----------
+        function ejecutarAccion(accion, id) {
+            const producto = productos.find(p => p.id === id);
+            if (!producto) return;
+
+            switch(accion) {
+                case 'vender-unidad':
+                    venderUnidad(id);
+                    break;
+                case 'vender-lote':
+                    venderLote(id);
+                    break;
+                case 'editar':
+                    editarProducto(id);
+                    break;
+                case 'eliminar':
+                    eliminarProducto(id);
+                    break;
+            }
+        }
+
+        function venderUnidad(id) {
+            const producto = productos.find(p => p.id === id);
+            if (producto && producto.cantidad > producto.vendidos) {
+                producto.vendidos++;
+                registrarVenta(producto, 1);
+                guardarDatos();
+                actualizarInterfaz();
+            }
+        }
+
+        function venderLote(id) {
+            const producto = productos.find(p => p.id === id);
+            if (producto) {
+                const cantidadAVender = producto.cantidad - producto.vendidos;
+                if (cantidadAVender > 0) {
+                    if (confirm(`¿Vender ${cantidadAVender} unidad(es) de ${producto.nombre}?`)) {
+                        producto.vendidos = producto.cantidad;
+                        registrarVenta(producto, cantidadAVender);
+                        guardarDatos();
+                        actualizarInterfaz();
+                    }
+                }
+            }
+        }
+
+        function registrarVenta(producto, cantidad) {
+            const venta = {
+                id: Date.now().toString(),
+                nombreProducto: producto.nombre,
+                cantidad: cantidad,
+                montoUSD: producto.precioUSD * cantidad,
+                fecha: new Date().toLocaleString('es-VE')
+            };
+            ventas.push(venta);
+        }
+
+        function agregarProducto() {
+            const nombre = document.getElementById('inputNombre').value.trim();
+            const precioUSD = parseFloat(document.getElementById('inputPrecioUSD').value);
+            const cantidad = parseInt(document.getElementById('inputCantidad').value);
+
+            if (!nombre || isNaN(precioUSD) || precioUSD <= 0 || isNaN(cantidad) || cantidad <= 0) {
+                alert('Por favor ingresa un nombre, precio válido y cantidad mayor a 0.');
+                return;
+            }
+
+            if (editandoId !== null) {
+                const producto = productos.find(p => p.id === editandoId);
+                if (producto) {
+                    producto.nombre = nombre;
+                    producto.precioUSD = precioUSD;
+                    producto.cantidad = cantidad;
+                }
+                editandoId = null;
+                document.getElementById('btnAgregar').textContent = 'Agregar producto';
+                document.getElementById('btnCancelarEdicion').style.display = 'none';
+            } else {
+                const nuevoProducto = {
+                    id: Date.now().toString(),
+                    nombre,
+                    precioUSD,
+                    cantidad,
+                    vendidos: 0
+                };
+                productos.push(nuevoProducto);
+            }
+
+            guardarDatos();
+            limpiarFormulario();
+            actualizarInterfaz();
+        }
+
+        function eliminarProducto(id) {
+            const producto = productos.find(p => p.id === id);
+            if (producto && confirm(`¿Eliminar ${producto.nombre}?`)) {
+                productos = productos.filter(p => p.id !== id);
+                guardarDatos();
+                actualizarInterfaz();
+            }
+        }
+
+        function editarProducto(id) {
+            const producto = productos.find(p => p.id === id);
+            if (!producto) return;
+            document.getElementById('inputNombre').value = producto.nombre;
+            document.getElementById('inputPrecioUSD').value = producto.precioUSD;
+            document.getElementById('inputCantidad').value = producto.cantidad;
+            editandoId = id;
+            document.getElementById('btnAgregar').textContent = 'Guardar cambios';
+            document.getElementById('btnCancelarEdicion').style.display = 'inline-block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('inputNombre').value = '';
+            document.getElementById('inputPrecioUSD').value = '';
+            document.getElementById('inputCantidad').value = '';
+        }
+
+        // ---------- EVENTOS ----------
+        document.getElementById('btnAgregar').addEventListener('click', agregarProducto);
+        document.getElementById('btnActualizarTasa').addEventListener('click', obtenerTasa);
+        document.getElementById('btnCancelarEdicion').addEventListener('click', () => {
+            editandoId = null;
+            document.getElementById('btnAgregar').textContent = 'Agregar producto';
+            document.getElementById('btnCancelarEdicion').style.display = 'none';
+            limpiarFormulario();
+        });
+
+        // Filtros
+        document.querySelectorAll('.filtro-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('filtro-activo'));
+                btn.classList.add('filtro-activo');
+                filtroActual = btn.dataset.filtro;
+                actualizarInterfaz();
+            });
+        });
+
+        // ---------- INICIALIZACIÓN ----------
+        cargarDatos();
+        cargarTasa();
+        actualizarInterfaz();
+        obtenerTasa();
+    </script>
+</body>
+</html>
